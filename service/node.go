@@ -13,7 +13,11 @@ type NodeService struct{}
 
 func (ns *NodeService) StartVM(context.Context, *node.VmConfig) (*node.Response, error) {
 	log.Println("StartVM called")
-	return nil, nil
+
+	// TODO remove error from response
+	return &node.Response{
+		Status: node.Response_SUCCESSFUL,
+	}, nil
 }
 
 func (ns *NodeService) StopVM(context.Context, *node.UUID) (*node.Response, error) {
