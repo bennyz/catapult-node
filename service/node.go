@@ -11,8 +11,8 @@ import (
 
 type NodeService struct{}
 
-func (ns *NodeService) StartVM(context.Context, *node.VmConfig) (*node.Response, error) {
-	log.Println("StartVM called")
+func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.Response, error) {
+	log.Println("StartVM called cfg: ", cfg)
 
 	// TODO remove error from response
 	return &node.Response{
