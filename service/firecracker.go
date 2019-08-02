@@ -31,10 +31,10 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 
 	cfg := firecracker.Config{
 		SocketPath:      "/tmp/fc-sock",
-		KernelImagePath: "hello-vmlinux.bin",
+		KernelImagePath: vmCfg.GetKernelImage(),
 		Drives: []models.Drive{{
 			DriveID:      firecracker.String("1"),
-			PathOnHost:   firecracker.String("hello-rootfs.ext4"),
+			PathOnHost:   firecracker.String(vmCfg.GetRootFileSystem()),
 			IsRootDevice: firecracker.Bool(true),
 			IsReadOnly:   firecracker.Bool(false),
 		}},
