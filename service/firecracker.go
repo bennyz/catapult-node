@@ -69,5 +69,12 @@ func createSocketPath(vmID uuid.UUID) string {
 	}
 
 	socketPath := filepath.Join(unixSocketDir, vmID.String())
+	if _, err := os.Stat(socketPath); err == nil {
+		err = os.Remove(socketPath)
+		if err != nil {
+			log.Println("Failed to remove socket file", err)
+		}
+	}
+
 	return socketPath
 }
