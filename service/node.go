@@ -11,10 +11,16 @@ import (
 
 type NodeService struct{}
 
+// StartVM starts a firecracker VM with the provided configuration
 func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.Response, error) {
 	log.Println("StartVM called cfg: ", cfg)
 
-	// TODO remove error from response
+	if err := runVMM(ctx, cfg); err != nil {
+		return &node.Response{
+			Status: node.Response_FAILED,
+		}, err
+	}
+
 	return &node.Response{
 		Status: node.Response_SUCCESSFUL,
 	}, nil
