@@ -17,7 +17,7 @@ import (
 )
 
 const firecrackerBinary = "./firecracker"
-const unixSocketDir = "fc-sockets"
+const unixSocketDir = "./fc-sockets"
 
 func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 	_, err := os.Stat(firecrackerBinary)
@@ -30,7 +30,6 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 	}
 
 	cfg := firecracker.Config{
-		SocketPath:      "/tmp/fc-sock",
 		KernelImagePath: vmCfg.GetKernelImage(),
 		Drives: []models.Drive{{
 			DriveID:      firecracker.String("1"),
