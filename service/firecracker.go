@@ -47,6 +47,7 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 			VcpuCount:  vmCfg.GetVcpus(),
 			MemSizeMib: vmCfg.GetMemory(),
 		},
+		// TODO move to a constant
 		LogLevel: "Debug",
 
 		// TODO extract
