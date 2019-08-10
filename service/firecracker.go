@@ -29,8 +29,15 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 	vmLog := filepath.Join(vmLogs, fmt.Sprintf("%s.log", vmCfg.GetVmID().GetValue()))
 	vmMetrics := filepath.Join(vmLogs, fmt.Sprintf("%s-metrics.log", vmCfg.GetVmID().GetValue()))
 
+	vmLogFifo := filepath.Join(vmLogs, vmCfg.GetVmID().GetValue()+"-log.fifo")
+	vmMetricsFifo := filepath.Join(vmLogs, vmCfg.GetVmID().GetValue()+"-metrics.fifo")
+
 	if _, err := os.Stat(vmDataPath); err != nil {
 		os.Mkdir(vmDataPath, os.ModeDir)
+	}
+
+	if _, err := os.Stat(vmLogs); err != nil {
+		os.Mkdir(vmLogs, os.ModeDir)
 	}
 
 	_, err := os.Stat(firecrackerBinary)
@@ -43,9 +50,6 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 	}
 	socketPath := filepath.Join(vmDataPath, vmCfg.GetVmID().GetValue())
 	os.Remove(socketPath)
-
-	logFifo := createFifo(vmCfg.GetVmID().GetValue(), "log")
-	metricsFifo := createFifo(vmCfg.GetVmID().GetValue(), "metrics")
 
 	cfg := firecracker.Config{
 		KernelImagePath: vmCfg.GetKernelImage(),
@@ -63,8 +67,8 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 		// TODO move to a constant
 		// TODO extract
 		LogLevel:    "Debug",
-		LogFifo:     logFifo,
-		MetricsFifo: metricsFifo,
+		LogFifo:     vmLogFifo,
+		MetricsFifo: vmMetricsFifo,
 	}
 
 	cmd := firecracker.VMCommandBuilder{}.
@@ -79,8 +83,8 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 	if err != nil {
 		return fmt.Errorf("Failed creating machine: %s", err)
 	}
-	go readPipe(logFifo, vmLog)
-	go readPipe(metricsFifo, vmMetrics)
+	go readPipe(vmLog, vmLog)
+	go readPipe(vmMetrics, vmMetrics)
 	if err := m.Start(ctx); err != nil {
 		return fmt.Errorf("failed to start machine: %v", err)
 	}
@@ -114,21 +118,6 @@ func installSignalHandlers(ctx context.Context, m *firecracker.Machine) {
 			}
 		}
 	}()
-}
-
-// TODO make better
-func createFifo(vmId, typ string) string {
-	if _, err := os.Stat(vmLogs); err != nil {
-		os.Mkdir(vmLogs, os.ModeDir)
-	}
-
-	logPipe := filepath.Join(vmLogs, fmt.Sprintf("%s-%s.fifo", vmId, typ))
-	os.Remove(logPipe)
-	err := syscall.Mkfifo(logPipe, 0600)
-	if err != nil {
-		log.Errorf("Couldn't create named pipe", err)
-	}
-	return logPipe
 }
 
 func readPipe(path, out string) {
