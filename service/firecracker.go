@@ -1,13 +1,17 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"log"
+	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	models "github.com/firecracker-microvm/firecracker-go-sdk/client/models"
 
@@ -17,10 +21,14 @@ import (
 
 const (
 	firecrackerBinary = "./firecracker"
-	vmDataPath        = "/var/vms/"
+	vmDataPath        = "/var/vms"
+	vmLogs            = "fc-logs"
 )
 
 func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
+	vmLog := filepath.Join(vmLogs, fmt.Sprintf("%s.log", vmCfg.GetVmID().GetValue()))
+	vmMetrics := filepath.Join(vmLogs, fmt.Sprintf("%s-metrics.log", vmCfg.GetVmID().GetValue()))
+
 	if _, err := os.Stat(vmDataPath); err != nil {
 		os.Mkdir(vmDataPath, os.ModeDir)
 	}
@@ -34,6 +42,11 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 		return fmt.Errorf("Failed to stat binary, %q: %v", firecrackerBinary, err)
 	}
 	socketPath := filepath.Join(vmDataPath, vmCfg.GetVmID().GetValue())
+	os.Remove(socketPath)
+
+	logFifo := createFifo(vmCfg.GetVmID().GetValue(), "log")
+	metricsFifo := createFifo(vmCfg.GetVmID().GetValue(), "metrics")
+
 	cfg := firecracker.Config{
 		KernelImagePath: vmCfg.GetKernelImage(),
 		SocketPath:      socketPath,
@@ -48,10 +61,10 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 			MemSizeMib: vmCfg.GetMemory(),
 		},
 		// TODO move to a constant
-		LogLevel: "Debug",
-
 		// TODO extract
-		LogFifo: filepath.Join(vmDataPath, vmCfg.GetVmID().GetValue()+".log"),
+		LogLevel:    "Debug",
+		LogFifo:     logFifo,
+		MetricsFifo: metricsFifo,
 	}
 
 	cmd := firecracker.VMCommandBuilder{}.
@@ -66,7 +79,8 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 	if err != nil {
 		return fmt.Errorf("Failed creating machine: %s", err)
 	}
-
+	go readPipe(logFifo, vmLog)
+	go readPipe(metricsFifo, vmMetrics)
 	if err := m.Start(ctx); err != nil {
 		return fmt.Errorf("failed to start machine: %v", err)
 	}
@@ -100,4 +114,41 @@ func installSignalHandlers(ctx context.Context, m *firecracker.Machine) {
 			}
 		}
 	}()
+}
+
+// TODO make better
+func createFifo(vmId, typ string) string {
+	if _, err := os.Stat(vmLogs); err != nil {
+		os.Mkdir(vmLogs, os.ModeDir)
+	}
+
+	logPipe := filepath.Join(vmLogs, fmt.Sprintf("%s-%s.fifo", vmId, typ))
+	os.Remove(logPipe)
+	err := syscall.Mkfifo(logPipe, 0600)
+	if err != nil {
+		log.Errorf("Couldn't create named pipe", err)
+	}
+	return logPipe
+}
+
+func readPipe(path, out string) {
+	pipe, _ := os.OpenFile(path, os.O_RDONLY, os.ModeNamedPipe)
+	output, _ := os.Create(filepath.Join(vmLogs, out))
+	var buff bytes.Buffer
+	defer output.Close()
+	defer pipe.Close()
+
+	for {
+		written, err := io.Copy(&buff, pipe)
+		if err != nil {
+			log.Error(err)
+		}
+		log.Infof("Written %d bytes", written)
+		if buff.Len() > 0 {
+			buff.WriteTo(output)
+			output.Sync()
+		}
+
+		time.Sleep(1 * time.Second)
+	}
 }
