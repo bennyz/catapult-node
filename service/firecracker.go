@@ -1,10 +1,9 @@
 package service
 
 import (
-	"bytes"
+	"bufio"
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -83,8 +82,6 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 	if err != nil {
 		return fmt.Errorf("Failed creating machine: %s", err)
 	}
-	go readPipe(vmLog, vmLog)
-	go readPipe(vmMetrics, vmMetrics)
 	if err := m.Start(ctx); err != nil {
 		return fmt.Errorf("failed to start machine: %v", err)
 	}
@@ -92,6 +89,8 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 	// TODO why is this needed?
 	defer m.StopVMM()
 	installSignalHandlers(ctx, m)
+	go readPipe(vmLogFifo, vmLog)
+	go readPipe(vmMetricsFifo, vmMetrics)
 
 	if err := m.Wait(ctx); err != nil {
 		return fmt.Errorf("wait returned an error %s", err)
@@ -121,21 +120,30 @@ func installSignalHandlers(ctx context.Context, m *firecracker.Machine) {
 }
 
 func readPipe(path, out string) {
-	pipe, _ := os.OpenFile(path, os.O_RDONLY, os.ModeNamedPipe)
-	output, _ := os.Create(filepath.Join(vmLogs, out))
-	var buff bytes.Buffer
+	pipe, err := os.OpenFile(path, os.O_RDONLY, os.ModeNamedPipe)
+	if err != nil {
+		log.Error(err)
+	}
+
+	var output *os.File
+	if _, err := os.Stat(out); err != nil {
+		output, err = os.Create(out)
+		if err != nil {
+			log.Errorf("Failed to create log file %s, %s", out, err)
+		}
+	}
+
 	defer output.Close()
 	defer pipe.Close()
 
+	reader := bufio.NewReader(pipe)
+	writer := bufio.NewWriter(output)
+
 	for {
-		written, err := io.Copy(&buff, pipe)
-		if err != nil {
-			log.Error(err)
-		}
-		log.Infof("Written %d bytes", written)
-		if buff.Len() > 0 {
-			buff.WriteTo(output)
-			output.Sync()
+		line, err := reader.ReadBytes('\n')
+		if err == nil {
+			writer.Write(line)
+			writer.Flush()
 		}
 
 		time.Sleep(1 * time.Second)
