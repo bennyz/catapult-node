@@ -83,13 +83,14 @@ func runVMM(ctx context.Context, vmCfg *node.VmConfig) error {
 	if err != nil {
 		return fmt.Errorf("Failed creating machine: %s", err)
 	}
+
 	go readPipe(vmLog, vmLog)
 	go readPipe(vmMetrics, vmMetrics)
+
 	if err := m.Start(ctx); err != nil {
 		return fmt.Errorf("failed to start machine: %v", err)
 	}
 
-	// TODO why is this needed?
 	defer m.StopVMM()
 	installSignalHandlers(ctx, m)
 
