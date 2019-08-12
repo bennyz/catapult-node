@@ -18,6 +18,6 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
-	serveCmd.Flags().IntVarP(&port, "port", "p", 8888, "Port for which to listen")
+	serveCmd.Flags().IntVarP(&port, "port", "p", 8001, "Port for which to listen")
 
 }
