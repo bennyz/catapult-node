@@ -15,7 +15,7 @@ import (
 
 func init() {
 	// TODO make configurable
-	f, err := os.OpenFile("catapult-node.log", os.O_WRONLY|os.O_CREATE, 0755)
+	f, err := os.OpenFile("catapult-node.log", os.O_RDONLY|os.O_CREATE, 0600)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,5 +33,7 @@ func Start(port int) {
 	server := grpc.NewServer()
 
 	node.RegisterNodeServer(server, &service.NodeService{})
-	server.Serve(lis)
+	if err := server.Serve(lis); err != nil {
+		log.Error(err)
+	}
 }
