@@ -15,7 +15,7 @@ import (
 
 func init() {
 	// TODO make configurable
-	f, err := os.OpenFile("catapult-node.log", os.O_RDONLY|os.O_CREATE, 0600)
+	f, err := os.OpenFile("catapult-node.log", os.O_RDONLY|os.O_CREATE, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}
