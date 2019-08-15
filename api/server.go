@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/firecracker-microvm/firecracker-go-sdk"
+
 	"google.golang.org/grpc/keepalive"
 
 	log "github.com/sirupsen/logrus"
@@ -39,7 +41,9 @@ func Start(port int) {
 		}),
 	)
 
-	node.RegisterNodeServer(server, &service.NodeService{})
+	node.RegisterNodeServer(server, &service.NodeService{
+		Machines: make(map[string]*firecracker.Machine),
+	})
 	if err := server.Serve(lis); err != nil {
 		log.Error(err)
 	}
