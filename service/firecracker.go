@@ -29,7 +29,9 @@ type fcHandler struct {
 	vmID string
 }
 
-func (f *fcHandler) runVMM(ctx context.Context, vmCfg *node.VmConfig, logger log.Logger) error {
+func (f *fcHandler) runVMM(ctx context.Context,
+	vmCfg *node.VmConfig,
+	logger log.Logger) (*firecracker.Machine, error) {
 	if _, err := os.Stat(vmDataPath); err != nil {
 		os.Mkdir(vmDataPath, os.ModeDir)
 	}
@@ -40,11 +42,11 @@ func (f *fcHandler) runVMM(ctx context.Context, vmCfg *node.VmConfig, logger log
 
 	_, err := os.Stat(firecrackerBinary)
 	if os.IsNotExist(err) {
-		return fmt.Errorf("Binary %q does not exist: %v", firecrackerBinary, err)
+		return nil, fmt.Errorf("Binary %q does not exist: %v", firecrackerBinary, err)
 	}
 
 	if err != nil {
-		return fmt.Errorf("Failed to stat binary, %q: %v", firecrackerBinary, err)
+		return nil, fmt.Errorf("Failed to stat binary, %q: %v", firecrackerBinary, err)
 	}
 	socketPath := filepath.Join(vmDataPath, vmCfg.GetVmID().GetValue())
 	os.Remove(socketPath)
@@ -72,8 +74,6 @@ func (f *fcHandler) runVMM(ctx context.Context, vmCfg *node.VmConfig, logger log
 	cmd := firecracker.VMCommandBuilder{}.
 		WithBin(firecrackerBinary).
 		WithSocketPath(socketPath).
-		WithStdin(os.Stdin).
-		WithStderr(os.Stderr).
 		Build(ctx)
 
 	log.Infof("Creating new machine definition %v", cfg)
@@ -82,7 +82,7 @@ func (f *fcHandler) runVMM(ctx context.Context, vmCfg *node.VmConfig, logger log
 		firecracker.WithProcessRunner(cmd),
 		firecracker.WithLogger(log.NewEntry(&logger)))
 	if err != nil {
-		return fmt.Errorf("Failed creating machine: %s", err)
+		return nil, fmt.Errorf("Failed creating machine: %s", err)
 	}
 
 	log.Info("Starting machine...")
@@ -95,14 +95,14 @@ func (f *fcHandler) runVMM(ctx context.Context, vmCfg *node.VmConfig, logger log
 	case err = <-errChan:
 		if err != nil {
 			log.Error("fc error", err)
+			return nil, err
 		}
 	case <-time.After(3 * time.Second):
 		log.Info("No errors after 3 seconds, assuming success")
 	}
 
 	installSignalHandlers(ctx, m)
-
-	return err
+	return m, err
 }
 
 func (f *fcHandler) getFileNameByMethod(typ, method string) string {

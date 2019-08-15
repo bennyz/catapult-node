@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
-	"time"
+	"fmt"
+
+	"github.com/firecracker-microvm/firecracker-go-sdk"
 
 	log "github.com/sirupsen/logrus"
 
@@ -12,33 +14,24 @@ import (
 )
 
 type NodeService struct {
+	Machines map[string]*firecracker.Machine
 }
 
 // StartVM starts a firecracker VM with the provided configuration
 func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.Response, error) {
-	log.Debug("StartVM called cfg: ", cfg)
+	log.Debug("Starting VM", cfg.GetVmID().GetValue())
 	fch := &fcHandler{
-		vmID: cfg.GetVmID().Value,
+		vmID: cfg.GetVmID().GetValue(),
 	}
-	errChan := make(chan error, 1)
 
-	go func() {
-		errChan <- fch.runVMM(context.Background(), cfg, log.Logger{})
-	}()
-
-	var err error
-
-	select {
-	case err = <-errChan:
-		if err != nil {
-			log.Error("error ", err)
-			return &node.Response{
-				Status: node.Response_FAILED,
-			}, err
-		}
-	case <-time.After(30 * time.Second):
-		log.Info("No error return after 30 seconds, assuming success")
+	m, err := fch.runVMM(context.Background(), cfg, log.Logger{})
+	if err != nil {
+		return &node.Response{
+			Status: node.Response_FAILED,
+		}, err
 	}
+
+	ns.Machines[cfg.GetVmID().GetValue()] = m
 
 	go fch.readPipe("log")
 	go fch.readPipe("metrics")
@@ -48,8 +41,25 @@ func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.R
 	}, nil
 }
 
-func (ns *NodeService) StopVM(context.Context, *node.UUID) (*node.Response, error) {
-	log.Debug("StopVM called")
+func (ns *NodeService) StopVM(ctx context.Context, uuid *node.UUID) (*node.Response, error) {
+	log.Debug("StopVM called on VM ", uuid.GetValue())
+	if v, ok := ns.Machines[uuid.GetValue()]; !ok {
+		log.Errorf("VM %s not found", uuid.GetValue())
+		return &node.Response{
+			Status: node.Response_FAILED,
+		}, fmt.Errorf("VM %s not found", uuid.GetValue())
+	} else {
+		err := v.StopVMM()
+		if err != nil {
+			log.Error("Failed to stop VM ", uuid.GetValue())
+			return &node.Response{
+				Status: node.Response_FAILED,
+			}, err
+		}
+	}
+
+	log.Infof("Stopped VM %s", uuid.GetValue())
+
 	return &node.Response{
 		Status: node.Response_SUCCESSFUL,
 	}, nil
