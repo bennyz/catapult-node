@@ -88,3 +88,51 @@ func generateMACAddress() (string, error) {
 	return fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x",
 		buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]), nil
 }
+
+func setupNetwork(tapDeviceName string) (*fcNetwork, error) {
+	bridgeAddr, err := getBridge()
+	if err != nil {
+		return nil, err
+	}
+
+	_, bridgeIP, err := net.ParseCIDR(bridgeAddr.String())
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("Creating tap device...")
+	_, err = createTapDevice(tapDeviceName)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create tap device: %s", err)
+	}
+
+	log.Info("Adding tap device to bridge...")
+	_, err = addTapToBridge(tapDeviceName, fcBridgeName)
+
+	log.Info("Looking for an IP address")
+	ip, err := findAvailableIP()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to find IP address: %s", err)
+	}
+
+	log.WithFields(log.Fields{
+		"IP": ip,
+	}).Info("Found IP address")
+
+	log.Info("Generating MAC address")
+	macAddress, err := generateMACAddress()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to generate MAC address: %s", err)
+	}
+	log.WithFields(log.Fields{
+		"MAC": macAddress,
+	}).Info("Generated MAC address")
+
+	return &fcNetwork{
+		ip: ip,
+		// TODO extract and make safe
+		bridgeIP:   bridgeAddr.(*net.IPNet).IP.String(),
+		netmask:    net.IP(bridgeIP.Mask).String(),
+		macAddress: macAddress,
+	}, nil
+}
