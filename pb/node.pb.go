@@ -25,29 +25,29 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type Response_Status int32
+type Status int32
 
 const (
-	Response_SUCCESSFUL Response_Status = 0
-	Response_FAILED     Response_Status = 1
+	Status_SUCCESSFUL Status = 0
+	Status_FAILED     Status = 1
 )
 
-var Response_Status_name = map[int32]string{
+var Status_name = map[int32]string{
 	0: "SUCCESSFUL",
 	1: "FAILED",
 }
 
-var Response_Status_value = map[string]int32{
+var Status_value = map[string]int32{
 	"SUCCESSFUL": 0,
 	"FAILED":     1,
 }
 
-func (x Response_Status) String() string {
-	return proto.EnumName(Response_Status_name, int32(x))
+func (x Status) String() string {
+	return proto.EnumName(Status_name, int32(x))
 }
 
-func (Response_Status) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_0c843d59d2d938e7, []int{2, 0}
+func (Status) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_0c843d59d2d938e7, []int{0}
 }
 
 type UUID struct {
@@ -169,11 +169,11 @@ func (m *VmConfig) GetAddress() string {
 }
 
 type Response struct {
-	Status               Response_Status `protobuf:"varint,1,opt,name=status,proto3,enum=Response_Status" json:"status,omitempty"`
-	Config               *VmConfig       `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	Status               Status    `protobuf:"varint,1,opt,name=status,proto3,enum=node.Status" json:"status,omitempty"`
+	Config               *VmConfig `protobuf:"bytes,2,opt,name=config,proto3" json:"config,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *Response) Reset()         { *m = Response{} }
@@ -201,11 +201,11 @@ func (m *Response) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Response proto.InternalMessageInfo
 
-func (m *Response) GetStatus() Response_Status {
+func (m *Response) GetStatus() Status {
 	if m != nil {
 		return m.Status
 	}
-	return Response_SUCCESSFUL
+	return Status_SUCCESSFUL
 }
 
 func (m *Response) GetConfig() *VmConfig {
@@ -254,41 +254,134 @@ func (m *VmList) GetVmID() []*UUID {
 	return nil
 }
 
+type ImageName struct {
+	ImageName            string   `protobuf:"bytes,1,opt,name=imageName,proto3" json:"imageName,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ImageName) Reset()         { *m = ImageName{} }
+func (m *ImageName) String() string { return proto.CompactTextString(m) }
+func (*ImageName) ProtoMessage()    {}
+func (*ImageName) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0c843d59d2d938e7, []int{4}
+}
+
+func (m *ImageName) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ImageName.Unmarshal(m, b)
+}
+func (m *ImageName) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ImageName.Marshal(b, m, deterministic)
+}
+func (m *ImageName) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ImageName.Merge(m, src)
+}
+func (m *ImageName) XXX_Size() int {
+	return xxx_messageInfo_ImageName.Size(m)
+}
+func (m *ImageName) XXX_DiscardUnknown() {
+	xxx_messageInfo_ImageName.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ImageName proto.InternalMessageInfo
+
+func (m *ImageName) GetImageName() string {
+	if m != nil {
+		return m.ImageName
+	}
+	return ""
+}
+
+type DriveResponse struct {
+	Status               Status   `protobuf:"varint,1,opt,name=status,proto3,enum=node.Status" json:"status,omitempty"`
+	Size                 int64    `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DriveResponse) Reset()         { *m = DriveResponse{} }
+func (m *DriveResponse) String() string { return proto.CompactTextString(m) }
+func (*DriveResponse) ProtoMessage()    {}
+func (*DriveResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0c843d59d2d938e7, []int{5}
+}
+
+func (m *DriveResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DriveResponse.Unmarshal(m, b)
+}
+func (m *DriveResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DriveResponse.Marshal(b, m, deterministic)
+}
+func (m *DriveResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DriveResponse.Merge(m, src)
+}
+func (m *DriveResponse) XXX_Size() int {
+	return xxx_messageInfo_DriveResponse.Size(m)
+}
+func (m *DriveResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DriveResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DriveResponse proto.InternalMessageInfo
+
+func (m *DriveResponse) GetStatus() Status {
+	if m != nil {
+		return m.Status
+	}
+	return Status_SUCCESSFUL
+}
+
+func (m *DriveResponse) GetSize() int64 {
+	if m != nil {
+		return m.Size
+	}
+	return 0
+}
+
 func init() {
-	proto.RegisterEnum("Response_Status", Response_Status_name, Response_Status_value)
-	proto.RegisterType((*UUID)(nil), "UUID")
-	proto.RegisterType((*VmConfig)(nil), "VmConfig")
-	proto.RegisterType((*Response)(nil), "Response")
-	proto.RegisterType((*VmList)(nil), "VmList")
+	proto.RegisterEnum("node.Status", Status_name, Status_value)
+	proto.RegisterType((*UUID)(nil), "node.UUID")
+	proto.RegisterType((*VmConfig)(nil), "node.VmConfig")
+	proto.RegisterType((*Response)(nil), "node.Response")
+	proto.RegisterType((*VmList)(nil), "node.VmList")
+	proto.RegisterType((*ImageName)(nil), "node.ImageName")
+	proto.RegisterType((*DriveResponse)(nil), "node.DriveResponse")
 }
 
 func init() { proto.RegisterFile("node.proto", fileDescriptor_0c843d59d2d938e7) }
 
 var fileDescriptor_0c843d59d2d938e7 = []byte{
-	// 360 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x5c, 0x51, 0x5d, 0xab, 0xda, 0x40,
-	0x10, 0x35, 0x35, 0x6e, 0x74, 0x04, 0x91, 0xa1, 0x48, 0x6a, 0x7d, 0xd0, 0xb4, 0x14, 0x1f, 0xca,
-	0x0a, 0xe9, 0x2f, 0x28, 0x7e, 0x40, 0x40, 0xfb, 0x90, 0x90, 0xbc, 0x47, 0xb3, 0x06, 0x69, 0x36,
-	0x1b, 0xb2, 0x1b, 0xc1, 0x87, 0xfb, 0xbb, 0xee, 0xdf, 0xbb, 0x64, 0x63, 0xee, 0xf5, 0xfa, 0x78,
-	0xce, 0x99, 0x99, 0x33, 0x33, 0x07, 0x20, 0x17, 0x09, 0xa3, 0x45, 0x29, 0x94, 0x98, 0x7e, 0x4f,
-	0x85, 0x48, 0x33, 0xb6, 0xd2, 0xe8, 0x58, 0x9d, 0x57, 0x8c, 0x17, 0xea, 0xd6, 0x88, 0xce, 0x0c,
-	0xcc, 0x30, 0xf4, 0x36, 0xf8, 0x15, 0x7a, 0xd7, 0x38, 0xab, 0x98, 0x6d, 0xcc, 0x8d, 0xe5, 0xc0,
-	0x6f, 0x80, 0xf3, 0x6a, 0x40, 0x3f, 0xe2, 0x6b, 0x91, 0x9f, 0x2f, 0x29, 0x7e, 0x03, 0xf3, 0xca,
-	0xbd, 0x8d, 0xae, 0x18, 0xba, 0x3d, 0x5a, 0xf7, 0xf9, 0x9a, 0xc2, 0x09, 0x10, 0xce, 0xb8, 0x28,
-	0x6f, 0xf6, 0x97, 0xb9, 0xb1, 0xec, 0xfa, 0x77, 0xa4, 0xa7, 0x9e, 0x8a, 0x4a, 0xda, 0x5d, 0x4d,
-	0x37, 0x00, 0xe7, 0x30, 0xfc, 0xcf, 0xca, 0x9c, 0x65, 0x1e, 0x8f, 0x53, 0x66, 0x9b, 0xda, 0xf1,
-	0x91, 0xc2, 0x5f, 0x30, 0x2a, 0x85, 0x50, 0xbb, 0x4b, 0xc6, 0x82, 0x9b, 0x54, 0x8c, 0xdb, 0x3d,
-	0x5d, 0xf4, 0xc4, 0xa2, 0x0d, 0x56, 0x9c, 0x24, 0x25, 0x93, 0xd2, 0x26, 0xba, 0xa0, 0x85, 0xce,
-	0x0b, 0xf4, 0x7d, 0x26, 0x0b, 0x91, 0x4b, 0x86, 0x4b, 0x20, 0x52, 0xc5, 0xaa, 0x92, 0x7a, 0xf5,
-	0x91, 0x3b, 0xa6, 0xad, 0x44, 0x03, 0xcd, 0xfb, 0x77, 0x1d, 0x17, 0x40, 0x4e, 0xfa, 0x58, 0x7d,
-	0xc7, 0xd0, 0x1d, 0xd0, 0xf6, 0x7a, 0xff, 0x2e, 0x38, 0x3f, 0x81, 0x34, 0x4d, 0x38, 0x02, 0x08,
-	0xc2, 0xf5, 0x7a, 0x1b, 0x04, 0xbb, 0x70, 0x3f, 0xee, 0x20, 0x00, 0xd9, 0xfd, 0xf5, 0xf6, 0xdb,
-	0xcd, 0xd8, 0x70, 0x7e, 0x00, 0x89, 0xf8, 0xfe, 0x22, 0xd5, 0xc3, 0xd7, 0xba, 0x4f, 0x5f, 0x73,
-	0x2b, 0x30, 0xff, 0x89, 0x84, 0xe1, 0x02, 0xac, 0x40, 0xc5, 0xa5, 0x8a, 0x0e, 0xf8, 0x61, 0x38,
-	0x1d, 0xbc, 0x6f, 0xe9, 0x74, 0x70, 0x56, 0xbb, 0x8a, 0x22, 0x3a, 0x60, 0x33, 0xe1, 0xb3, 0xfa,
-	0x1b, 0xac, 0xda, 0x2b, 0x3a, 0x48, 0x9c, 0xd0, 0x26, 0x6d, 0xda, 0xa6, 0x4d, 0xb7, 0x75, 0xda,
-	0x53, 0x8b, 0x36, 0xfb, 0x38, 0x9d, 0x23, 0xd1, 0xd2, 0x9f, 0xb7, 0x00, 0x00, 0x00, 0xff, 0xff,
-	0xbd, 0x8f, 0x8d, 0x0e, 0x24, 0x02, 0x00, 0x00,
+	// 433 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x92, 0xcf, 0x6a, 0xdb, 0x40,
+	0x10, 0xc6, 0xad, 0x5a, 0x91, 0xe3, 0x71, 0xea, 0x86, 0x69, 0x09, 0xc2, 0x0d, 0xc5, 0x2c, 0x21,
+	0xb8, 0x2d, 0x28, 0xd4, 0xa5, 0x0f, 0x50, 0xfc, 0x07, 0x04, 0x76, 0x0e, 0x12, 0x16, 0xbd, 0x2a,
+	0xf1, 0xc4, 0x88, 0x7a, 0xbd, 0x42, 0xbb, 0x32, 0xb8, 0xcf, 0xd6, 0x6b, 0xdf, 0xab, 0x68, 0x56,
+	0x6a, 0xdd, 0xe0, 0x4b, 0x6f, 0xfa, 0xbe, 0xf9, 0xb4, 0x33, 0xf3, 0x63, 0x00, 0x76, 0x6a, 0x4d,
+	0x41, 0x5e, 0x28, 0xa3, 0xd0, 0xad, 0xbe, 0x07, 0x6f, 0x37, 0x4a, 0x6d, 0xb6, 0x74, 0xc7, 0xde,
+	0x43, 0xf9, 0x74, 0x47, 0x32, 0x37, 0x07, 0x1b, 0x11, 0xd7, 0xe0, 0xae, 0x56, 0xe1, 0x14, 0xdf,
+	0xc0, 0xd9, 0x3e, 0xdd, 0x96, 0xe4, 0x3b, 0x43, 0x67, 0xd4, 0x8d, 0xac, 0x10, 0x3f, 0x1d, 0x38,
+	0x4f, 0xe4, 0x44, 0xed, 0x9e, 0xb2, 0x0d, 0xbe, 0x03, 0x77, 0x2f, 0xc3, 0x29, 0x27, 0x7a, 0x63,
+	0x08, 0xb8, 0x51, 0xf5, 0x73, 0xc4, 0x3e, 0x5e, 0x81, 0x27, 0x49, 0xaa, 0xe2, 0xe0, 0xbf, 0x18,
+	0x3a, 0xa3, 0x76, 0x54, 0x2b, 0x7e, 0xfa, 0x31, 0x2f, 0xb5, 0xdf, 0x66, 0xdb, 0x0a, 0x1c, 0x42,
+	0xef, 0x3b, 0x15, 0x3b, 0xda, 0x86, 0x32, 0xdd, 0x90, 0xef, 0x72, 0xdb, 0x63, 0x0b, 0x6f, 0xa1,
+	0x5f, 0x28, 0x65, 0xe6, 0xd9, 0x96, 0xe2, 0x83, 0x36, 0x24, 0xfd, 0x33, 0x0e, 0x3d, 0x73, 0xd1,
+	0x87, 0x4e, 0xba, 0x5e, 0x17, 0xa4, 0xb5, 0xef, 0x71, 0xa0, 0x91, 0xe2, 0x1b, 0x9c, 0x47, 0xa4,
+	0x73, 0xb5, 0xd3, 0x84, 0x37, 0xe0, 0x69, 0x93, 0x9a, 0x52, 0xf3, 0xfc, 0xfd, 0xf1, 0x85, 0x9d,
+	0x3f, 0x66, 0x2f, 0xaa, 0x6b, 0x78, 0x0b, 0xde, 0x23, 0x6f, 0xcb, 0x3b, 0xf4, 0xc6, 0x7d, 0x9b,
+	0x6a, 0x18, 0x44, 0x75, 0x55, 0x8c, 0xc0, 0x4b, 0xe4, 0x22, 0xd3, 0xe6, 0x88, 0x4a, 0xfb, 0x14,
+	0x15, 0xf1, 0x1e, 0xba, 0xbc, 0xce, 0x7d, 0x2a, 0x09, 0xaf, 0xa1, 0x9b, 0x35, 0xa2, 0x26, 0xfd,
+	0xd7, 0x10, 0x21, 0xbc, 0x9c, 0x16, 0xd9, 0x9e, 0xfe, 0x73, 0x66, 0x04, 0x57, 0x67, 0x3f, 0xa8,
+	0xa6, 0xce, 0xdf, 0x1f, 0x6e, 0xc0, 0xb3, 0x29, 0xec, 0x03, 0xc4, 0xab, 0xc9, 0x64, 0x16, 0xc7,
+	0xf3, 0xd5, 0xe2, 0xb2, 0x85, 0x00, 0xde, 0xfc, 0x6b, 0xb8, 0x98, 0x4d, 0x2f, 0x9d, 0xf1, 0x2f,
+	0x07, 0xdc, 0x7b, 0xb5, 0x26, 0xfc, 0x08, 0x9d, 0xd8, 0xa4, 0x85, 0x49, 0x96, 0xf8, 0x6c, 0xe3,
+	0x41, 0xad, 0x9b, 0x99, 0x44, 0xab, 0x62, 0x14, 0x1b, 0x95, 0x27, 0x4b, 0x3c, 0xda, 0xf6, 0x44,
+	0xee, 0x13, 0x74, 0x2a, 0x42, 0xc9, 0x52, 0xe3, 0x55, 0x60, 0x6f, 0x30, 0x68, 0x6e, 0x30, 0x98,
+	0x55, 0x37, 0x38, 0xb8, 0x68, 0x9a, 0x55, 0x41, 0xd1, 0xc2, 0x2f, 0xd0, 0x9b, 0x14, 0x94, 0x1a,
+	0x62, 0x0e, 0xf8, 0xca, 0x96, 0xff, 0xf0, 0x1b, 0xbc, 0xb6, 0xc6, 0x3f, 0x94, 0x44, 0xeb, 0xc1,
+	0xe3, 0x67, 0x3f, 0xff, 0x0e, 0x00, 0x00, 0xff, 0xff, 0x3e, 0x08, 0x39, 0xcd, 0xfc, 0x02, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -306,6 +399,7 @@ type NodeClient interface {
 	StartVM(ctx context.Context, in *VmConfig, opts ...grpc.CallOption) (*Response, error)
 	StopVM(ctx context.Context, in *UUID, opts ...grpc.CallOption) (*Response, error)
 	ListVMs(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*VmList, error)
+	CreateDrive(ctx context.Context, in *ImageName, opts ...grpc.CallOption) (*DriveResponse, error)
 }
 
 type nodeClient struct {
@@ -318,7 +412,7 @@ func NewNodeClient(cc *grpc.ClientConn) NodeClient {
 
 func (c *nodeClient) StartVM(ctx context.Context, in *VmConfig, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/Node/StartVM", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/node.Node/StartVM", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +421,7 @@ func (c *nodeClient) StartVM(ctx context.Context, in *VmConfig, opts ...grpc.Cal
 
 func (c *nodeClient) StopVM(ctx context.Context, in *UUID, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, "/Node/StopVM", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/node.Node/StopVM", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -336,7 +430,16 @@ func (c *nodeClient) StopVM(ctx context.Context, in *UUID, opts ...grpc.CallOpti
 
 func (c *nodeClient) ListVMs(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*VmList, error) {
 	out := new(VmList)
-	err := c.cc.Invoke(ctx, "/Node/ListVMs", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/node.Node/ListVMs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeClient) CreateDrive(ctx context.Context, in *ImageName, opts ...grpc.CallOption) (*DriveResponse, error) {
+	out := new(DriveResponse)
+	err := c.cc.Invoke(ctx, "/node.Node/CreateDrive", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -348,6 +451,7 @@ type NodeServer interface {
 	StartVM(context.Context, *VmConfig) (*Response, error)
 	StopVM(context.Context, *UUID) (*Response, error)
 	ListVMs(context.Context, *empty.Empty) (*VmList, error)
+	CreateDrive(context.Context, *ImageName) (*DriveResponse, error)
 }
 
 // UnimplementedNodeServer can be embedded to have forward compatible implementations.
@@ -362,6 +466,9 @@ func (*UnimplementedNodeServer) StopVM(ctx context.Context, req *UUID) (*Respons
 }
 func (*UnimplementedNodeServer) ListVMs(ctx context.Context, req *empty.Empty) (*VmList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVMs not implemented")
+}
+func (*UnimplementedNodeServer) CreateDrive(ctx context.Context, req *ImageName) (*DriveResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDrive not implemented")
 }
 
 func RegisterNodeServer(s *grpc.Server, srv NodeServer) {
@@ -378,7 +485,7 @@ func _Node_StartVM_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Node/StartVM",
+		FullMethod: "/node.Node/StartVM",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NodeServer).StartVM(ctx, req.(*VmConfig))
@@ -396,7 +503,7 @@ func _Node_StopVM_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Node/StopVM",
+		FullMethod: "/node.Node/StopVM",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NodeServer).StopVM(ctx, req.(*UUID))
@@ -414,7 +521,7 @@ func _Node_ListVMs_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Node/ListVMs",
+		FullMethod: "/node.Node/ListVMs",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NodeServer).ListVMs(ctx, req.(*empty.Empty))
@@ -422,8 +529,26 @@ func _Node_ListVMs_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Node_CreateDrive_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ImageName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServer).CreateDrive(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/node.Node/CreateDrive",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServer).CreateDrive(ctx, req.(*ImageName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Node_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "Node",
+	ServiceName: "node.Node",
 	HandlerType: (*NodeServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -437,6 +562,10 @@ var _Node_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListVMs",
 			Handler:    _Node_ListVMs_Handler,
+		},
+		{
+			MethodName: "CreateDrive",
+			Handler:    _Node_CreateDrive_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

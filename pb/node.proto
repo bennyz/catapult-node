@@ -1,4 +1,5 @@
 syntax = "proto3";
+package node;
 
 import "google/protobuf/empty.proto";
 
@@ -15,12 +16,12 @@ message VmConfig {
     string address = 6;
 }
 
-message Response {
-    enum Status {
-        SUCCESSFUL = 0;
-        FAILED = 1;
-    }
+enum Status {
+    SUCCESSFUL = 0;
+    FAILED = 1;
+}
 
+message Response {
     Status status = 1;
     VmConfig config = 2;
 }
@@ -29,8 +30,19 @@ message VmList {
     repeated UUID vmID = 1;
 }
 
+message ImageName {
+    string imageName = 1;
+}
+
+message DriveResponse {
+    Status status = 1;
+    int64 size = 2;
+}
+
 service Node {
     rpc StartVM(VmConfig) returns (Response) {}
     rpc StopVM(UUID) returns (Response) {}
     rpc ListVMs(google.protobuf.Empty) returns (VmList) {}
+
+    rpc CreateDrive(ImageName) returns (DriveResponse) {}
 }
