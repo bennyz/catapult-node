@@ -30,7 +30,7 @@ func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.R
 	if err != nil {
 		log.Error(err)
 		return &node.Response{
-			Status: node.Response_FAILED,
+			Status: node.Status_SUCCESSFUL,
 		}, err
 	}
 
@@ -48,7 +48,7 @@ func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.R
 	m, err := fch.runVMM(context.Background(), cfg, log.Logger{})
 	if err != nil {
 		return &node.Response{
-			Status: node.Response_FAILED,
+			Status: node.Status_FAILED,
 		}, err
 	}
 
@@ -58,7 +58,7 @@ func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.R
 	go fch.readPipe("metrics")
 
 	return &node.Response{
-		Status: node.Response_SUCCESSFUL,
+		Status: node.Status_SUCCESSFUL,
 		Config: cfg,
 	}, nil
 }
@@ -69,14 +69,14 @@ func (ns *NodeService) StopVM(ctx context.Context, uuid *node.UUID) (*node.Respo
 	if !ok {
 		log.Errorf("VM %s not found", uuid.GetValue())
 		return &node.Response{
-			Status: node.Response_FAILED,
+			Status: node.Status_FAILED,
 		}, fmt.Errorf("VM %s not found", uuid.GetValue())
 	}
 	err := v.StopVMM()
 	if err != nil {
 		log.Error("Failed to stop VM ", uuid.GetValue())
 		return &node.Response{
-			Status: node.Response_FAILED,
+			Status: node.Status_FAILED,
 		}, err
 	}
 
@@ -87,7 +87,7 @@ func (ns *NodeService) StopVM(ctx context.Context, uuid *node.UUID) (*node.Respo
 	deleteDevice(fmt.Sprintf("%s-%s", "fc", vmID[len(vmID)-6:]))
 
 	return &node.Response{
-		Status: node.Response_SUCCESSFUL,
+		Status: node.Status_FAILED,
 	}, nil
 }
 
@@ -102,9 +102,7 @@ func (ns *NodeService) ListVMs(context.Context, *empty.Empty) (*node.VmList, err
 	return vmList, nil
 }
 
-type fcNetwork struct {
-	ip         string
-	bridgeIP   string
-	netmask    string
-	macAddress string
+func (ns *NodeService) CreateDrive(context.Context, *node.ImageName) (*node.DriveResponse, error) {
+
+	return nil, nil
 }

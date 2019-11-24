@@ -16,6 +16,13 @@ const fcBridgeName = "fcbridge"
 
 var ips = make([]string, 0, 0)
 
+type fcNetwork struct {
+	ip         string
+	bridgeIP   string
+	netmask    string
+	macAddress string
+}
+
 func createTapDevice(tapName string) (string, error) {
 	_, err := util.ExecuteCommand("ip", "tuntap", "add", tapName, "mode", "tap")
 	if err != nil {
