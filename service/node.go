@@ -18,7 +18,7 @@ type NodeService struct {
 }
 
 // StartVM starts a firecracker VM with the provided configuration
-func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.Response, error) {
+func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.VmResponse, error) {
 	log.Info("Starting VM ", cfg.GetVmID().GetValue())
 	vmID := cfg.GetVmID().GetValue()
 
@@ -29,8 +29,8 @@ func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.R
 
 	if err != nil {
 		log.Error(err)
-		return &node.Response{
-			Status: node.Status_SUCCESSFUL,
+		return &node.VmResponse{
+			Status: node.Status_FAILED,
 		}, err
 	}
 
@@ -47,7 +47,7 @@ func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.R
 
 	m, err := fch.runVMM(context.Background(), cfg, log.Logger{})
 	if err != nil {
-		return &node.Response{
+		return &node.VmResponse{
 			Status: node.Status_FAILED,
 		}, err
 	}
@@ -57,8 +57,8 @@ func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.R
 	go fch.readPipe("log")
 	go fch.readPipe("metrics")
 
-	return &node.Response{
-		Status: node.Status_SUCCESSFUL,
+	return &node.VmResponse{
+		Status: node.Status_SUCCESS,
 		Config: cfg,
 	}, nil
 }
@@ -102,7 +102,41 @@ func (ns *NodeService) ListVMs(context.Context, *empty.Empty) (*node.VmList, err
 	return vmList, nil
 }
 
-func (ns *NodeService) CreateDrive(context.Context, *node.ImageName) (*node.DriveResponse, error) {
+func (ns *NodeService) CreateDrive(ctx context.Context, img *node.ImageName) (*node.DriveResponse, error) {
+	path, err := pullImage(ctx, img.GetName())
+	if err != nil {
+		return &node.DriveResponse{
+			Status: node.Status_FAILED,
+			Size:   -1,
+			Path:   "",
+		}, err
+	}
 
-	return nil, nil
+	path, size, err := createRootFS(path)
+	if err != nil {
+		return &node.DriveResponse{
+			Status: node.Status_FAILED,
+			Size:   -1,
+			Path:   "",
+		}, err
+	}
+
+	return &node.DriveResponse{
+		Status: node.Status_SUCCESS,
+		Size:   size,
+		Path:   path,
+	}, err
+}
+
+func (ns *NodeService) ConnectVolume(ctx context.Context, vol *node.Volume) (*node.Response, error) {
+	err := mapVolume(vol.GetVolumeID(), vol.GetPoolName())
+	if err != nil {
+		return &node.Response{
+			Status: node.Status_FAILED,
+		}, err
+	}
+
+	return &node.Response{
+		Status: node.Status_SUCCESS,
+	}, err
 }
