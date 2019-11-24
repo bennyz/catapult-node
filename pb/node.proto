@@ -16,12 +16,12 @@ message VmConfig {
 }
 
 message Response {
-    enum RequestStatus {
+    enum Status {
         SUCCESSFUL = 0;
         FAILED = 1;
     }
 
-    RequestStatus status = 1;
+    Status status = 1;
     VmConfig config = 2;
 }
 
