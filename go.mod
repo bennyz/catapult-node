@@ -5,6 +5,7 @@ go 1.12
 require (
 	cloud.google.com/go v0.44.3 // indirect
 	github.com/PUMATeam/catapult v0.0.0-20190817080311-a029e8ceeedb // indirect
+	github.com/containers/image v1.5.2-0.20191003205244-4a633785f49b
 	github.com/firecracker-microvm/firecracker-go-sdk v0.17.0
 	github.com/go-kit/kit v0.9.0
 	github.com/go-pg/pg v8.0.5+incompatible // indirect
@@ -18,14 +19,16 @@ require (
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/opencontainers/image-tools v1.0.0-rc1.0.20190306063041-93db3b16e673
+	github.com/opencontainers/runtime-spec v1.0.1 // indirect
 	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0
-	github.com/stretchr/testify v1.4.0 // indirect
 	go.mongodb.org/mongo-driver v1.1.0 // indirect
+	go4.org v0.0.0-20191010144846-132d2879e1e9 // indirect
 	golang.org/x/arch v0.0.0-20190815191158-8a70ba74b3a1 // indirect
 	golang.org/x/mobile v0.0.0-20190814143026-e8b3e6111d02 // indirect
 	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7 // indirect
