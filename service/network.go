@@ -59,7 +59,10 @@ func (fn *fcNetwork) findAvailableIP() (string, error) {
 	// TODO handle errors
 	fn.log.Info("Looking for available IP address")
 
-	bridgeIP, _ := fn.getBridge()
+	bridgeIP, err := fn.getBridge()
+	if err != nil {
+		fn.log.Errorf("Couldn't find brige %s", err)
+	}
 	if len(ips) == 0 {
 		cmd := fmt.Sprintf("nmap -v -sn -n %s -oG - | awk '/Status: Down/{print $2}'",
 			bridgeIP.String())
@@ -82,14 +85,18 @@ func (fn *fcNetwork) findAvailableIP() (string, error) {
 func (fn *fcNetwork) getBridge() (net.Addr, error) {
 	iface, err := net.InterfaceByName(fcBridgeName)
 	if err != nil {
-		log.Error(err)
+		fn.log.Error(err)
 		return nil, err
 	}
 
 	addrs, err := iface.Addrs()
 	if err != nil {
-		log.Error(err)
+		fn.log.Error(err)
 		return nil, err
+	}
+
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("Bridge %s not available", fcBridgeName)
 	}
 
 	return addrs[0], nil

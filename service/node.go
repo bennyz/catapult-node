@@ -7,7 +7,6 @@ import (
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 
 	"github.com/sirupsen/logrus"
-	log "github.com/sirupsen/logrus"
 
 	node "github.com/PUMATeam/catapult-node/pb"
 
@@ -40,7 +39,7 @@ func (ns *NodeService) StartVM(ctx context.Context, cfg *node.VmConfig) (*node.V
 	network, err := fcNetwork.setupNetwork(tapDeviceName)
 
 	if err != nil {
-		log.Error(err)
+		ns.log.Error(err)
 		return &node.VmResponse{
 			Status: node.Status_FAILED,
 		}, err
